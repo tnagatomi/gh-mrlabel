@@ -19,30 +19,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+
+package parser
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
+	"github.com/tnagatomi/gh-mrlabel/option"
+	"strings"
 )
 
-var (
-	repos  string
-	dryRun bool
-)
+func Repo(input string) ([]option.Repo, error) {
+	inputSplit := strings.Split(input, ",")
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "gh-mrlabel",
-	Short: "gh extension for manipulating labels across multiple repositories",
-}
+	var repos []option.Repo
+	for _, repo := range inputSplit {
+		parts := strings.Split(repo, "/")
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
-}
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid repo format: %s", repo)
+		}
 
-func init() {
-	rootCmd.PersistentFlags().StringVarP(&repos, "repos", "R", "", "Select repositories using the OWNER/REPO format separated by comma (e.g., OWNER/REPO,OWNER/REPO)")
-	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Dry run")
+		repos = append(repos, option.Repo{
+			Owner: parts[0],
+			Repo:  parts[1],
+		})
+	}
+
+	return repos, nil
 }

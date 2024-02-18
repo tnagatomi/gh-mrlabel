@@ -19,30 +19,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package api
 
 import (
-	"github.com/spf13/cobra"
+	"context"
+	"fmt"
+	"github.com/google/go-github/v59/github"
+	"github.com/tnagatomi/gh-mrlabel/option"
+	"strings"
 )
 
-var (
-	repos  string
-	dryRun bool
-)
+func CreateLabel(client *github.Client, label option.Label, repo option.Repo) error {
+	githubLabel := &github.Label{
+		Name:        github.String(label.Name),
+		Description: github.String(label.Description),
+		Color:       github.String(label.Color),
+	}
+	_, _, err := client.Issues.CreateLabel(context.Background(), repo.Owner, repo.Repo, githubLabel)
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "gh-mrlabel",
-	Short: "gh extension for manipulating labels across multiple repositories",
-}
+	if err != nil {
+		if strings.Contains(err.Error(), "already_exists") {
+			return fmt.Errorf("label %q already exists for repository %q", label, repo)
+		}
+		return err
+	}
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
-}
-
-func init() {
-	rootCmd.PersistentFlags().StringVarP(&repos, "repos", "R", "", "Select repositories using the OWNER/REPO format separated by comma (e.g., OWNER/REPO,OWNER/REPO)")
-	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Dry run")
+	return nil
 }

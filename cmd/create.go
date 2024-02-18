@@ -22,27 +22,47 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
+	"github.com/cli/go-gh/v2/pkg/api"
 	"github.com/spf13/cobra"
+	"github.com/tnagatomi/gh-mrlabel/executor"
+	"os"
 )
 
 var (
-	repos  string
-	dryRun bool
+	labels string
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "gh-mrlabel",
-	Short: "gh extension for manipulating labels across multiple repositories",
-}
+// NewCreateCmd initialize the create command
+func NewCreateCmd() *cobra.Command {
+	var createCmd = &cobra.Command{
+		Use:   "create",
+		Short: "Create labels across multiple repositories",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			client, err := api.NewHTTPClient(api.ClientOptions{})
+			if err != nil {
+				return fmt.Errorf("failed to create gh http client: %v", err)
+			}
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
+			e, err := executor.NewExecutor(client, dryRun)
+			if err != nil {
+				return fmt.Errorf("failed to create exector: %v", err)
+			}
+
+			err = e.Create(os.Stdout, repos, labels)
+			if err != nil {
+				return fmt.Errorf("failed to create labels: %v", err)
+			}
+
+			return nil
+		},
+	}
+	return createCmd
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&repos, "repos", "R", "", "Select repositories using the OWNER/REPO format separated by comma (e.g., OWNER/REPO,OWNER/REPO)")
-	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Dry run")
+	createCmd := NewCreateCmd()
+	rootCmd.AddCommand(createCmd)
+
+	createCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to create in the format of 'label1:color1:description1,label2:color2:description2,...' (description can be omitted)")
 }

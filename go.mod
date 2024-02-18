@@ -2,12 +2,18 @@ module github.com/tnagatomi/gh-mrlabel
 
 go 1.22.0
 
-require github.com/cli/go-gh/v2 v2.5.0
+require (
+	github.com/cli/go-gh/v2 v2.5.0
+	github.com/google/go-cmp v0.6.0
+	github.com/google/go-github/v59 v59.0.0
+	github.com/spf13/cobra v1.8.0
+)
 
 require (
 	github.com/aymanbagabas/go-osc52 v1.0.3 // indirect
 	github.com/cli/safeexec v1.0.0 // indirect
 	github.com/cli/shurcooL-graphql v0.0.4 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/henvic/httpretty v0.0.6 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -16,7 +22,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/muesli/termenv v0.13.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/spf13/cobra v1.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e // indirect
 	golang.org/x/sys v0.13.0 // indirect

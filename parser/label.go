@@ -19,30 +19,61 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+
+package parser
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
+	"github.com/tnagatomi/gh-mrlabel/option"
+	"strings"
 )
 
-var (
-	repos  string
-	dryRun bool
-)
+func Label(input string) ([]option.Label, error) {
+	inputSplit := strings.Split(input, ",")
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "gh-mrlabel",
-	Short: "gh extension for manipulating labels across multiple repositories",
+	var labels []option.Label
+	for _, label := range inputSplit {
+		parts := strings.Split(label, ":")
+
+		if !(len(parts) == 3 || len(parts) == 2) {
+			return nil, fmt.Errorf("invalid label format: %s", label)
+		}
+
+		var name, color, description string
+		if len(parts) == 2 {
+			name = parts[0]
+			color = parts[1]
+		} else {
+			name = parts[0]
+			color = parts[1]
+			description = parts[2]
+		}
+
+		if !isHexColor(color) {
+			return nil, fmt.Errorf("invalid color format: %s", color)
+		}
+
+		labels = append(labels, option.Label{
+			Name:        name,
+			Color:       color,
+			Description: description,
+		})
+	}
+
+	return labels, nil
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
-}
+func isHexColor(s string) bool {
+	length := len(s)
+	if length != 3 && length != 6 {
+		return false
+	}
 
-func init() {
-	rootCmd.PersistentFlags().StringVarP(&repos, "repos", "R", "", "Select repositories using the OWNER/REPO format separated by comma (e.g., OWNER/REPO,OWNER/REPO)")
-	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Dry run")
+	for _, char := range s {
+		if !strings.ContainsRune("0123456789abcdefABCDEF", char) {
+			return false
+		}
+	}
+
+	return true
 }
