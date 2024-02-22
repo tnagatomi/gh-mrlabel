@@ -51,6 +51,9 @@ func (e *Executor) Create(out io.Writer, repoOption string, labelOption string) 
 		return fmt.Errorf("failed to parse label option: %v", err)
 	}
 	repos, err := parser.Repo(repoOption)
+	if err != nil {
+		return fmt.Errorf("failed to parse repo option: %v", err)
+	}
 
 	for _, repo := range repos {
 		for _, label := range labels {
