@@ -26,6 +26,7 @@ import (
 	"github.com/cli/go-gh/v2/pkg/api"
 	"github.com/spf13/cobra"
 	"github.com/tnagatomi/gh-mrlabel/executor"
+	"io"
 	"os"
 )
 
@@ -34,7 +35,7 @@ var (
 )
 
 // NewCreateCmd initialize the create command
-func NewCreateCmd() *cobra.Command {
+func NewCreateCmd(out io.Writer) *cobra.Command {
 	var createCmd = &cobra.Command{
 		Use:   "create",
 		Short: "Create labels across multiple repositories",
@@ -49,7 +50,7 @@ func NewCreateCmd() *cobra.Command {
 				return fmt.Errorf("failed to create exector: %v", err)
 			}
 
-			err = e.Create(os.Stdout, repos, labels)
+			err = e.Create(out, repos, labels)
 			if err != nil {
 				return fmt.Errorf("failed to create labels: %v", err)
 			}
@@ -61,7 +62,7 @@ func NewCreateCmd() *cobra.Command {
 }
 
 func init() {
-	createCmd := NewCreateCmd()
+	createCmd := NewCreateCmd(os.Stdout)
 	rootCmd.AddCommand(createCmd)
 
 	createCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to create in the format of 'label1:color1:description1,label2:color2:description2,...' (description can be omitted)")
