@@ -47,13 +47,15 @@ func NewDeleteCmd(in io.Reader, out io.Writer) *cobra.Command {
 				return fmt.Errorf("failed to create exector: %v", err)
 			}
 
-			confirmed, err := confirm(in, out)
-			if err != nil {
-				return fmt.Errorf("failed to confirm execution: %v", err)
-			}
-			if !dryRun && !confirmed {
-				fmt.Fprintf(out, "Canceled execution\n")
-				return nil
+			if !dryRun {
+				confirmed, err := confirm(in, out)
+				if err != nil {
+					return fmt.Errorf("failed to confirm execution: %v", err)
+				}
+				if !confirmed {
+					fmt.Fprintf(out, "Canceled execution\n")
+					return nil
+				}
 			}
 
 			err = e.Delete(out, repos, labels)
