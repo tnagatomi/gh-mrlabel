@@ -24,21 +24,18 @@ package cmd
 import (
 	"fmt"
 	"github.com/cli/go-gh/v2/pkg/api"
-	"github.com/spf13/cobra"
 	"github.com/tnagatomi/gh-mrlabel/executor"
 	"io"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
-var (
-	labels string
-)
-
-// NewCreateCmd initialize the create command
-func NewCreateCmd(out io.Writer) *cobra.Command {
-	var createCmd = &cobra.Command{
-		Use:   "create",
-		Short: "Create labels across multiple repositories",
+// NewDeleteCmd represents the delete command
+func NewDeleteCmd(in io.Reader, out io.Writer) *cobra.Command {
+	var deleteCmd = &cobra.Command{
+		Use:   "delete",
+		Short: "Delete labels across multiple repositories",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := api.NewHTTPClient(api.ClientOptions{})
 			if err != nil {
@@ -50,20 +47,29 @@ func NewCreateCmd(out io.Writer) *cobra.Command {
 				return fmt.Errorf("failed to create exector: %v", err)
 			}
 
-			err = e.Create(out, repos, labels)
+			confirmed, err := confirm(in, out)
 			if err != nil {
-				return fmt.Errorf("failed to create labels: %v", err)
+				return fmt.Errorf("failed to confirm execution: %v", err)
+			}
+			if !dryRun && !confirmed {
+				fmt.Fprintf(out, "Canceled execution\n")
+				return nil
+			}
+
+			err = e.Delete(out, repos, labels)
+			if err != nil {
+				return fmt.Errorf("failed to delete labels: %v", err)
 			}
 
 			return nil
 		},
 	}
-	return createCmd
+	return deleteCmd
 }
 
 func init() {
-	createCmd := NewCreateCmd(os.Stdout)
-	rootCmd.AddCommand(createCmd)
+	deleteCmd := NewDeleteCmd(os.Stdin, os.Stdout)
+	rootCmd.AddCommand(deleteCmd)
 
-	createCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to create in the format of 'label1:color1:description1[,label2:color2:description2,...]' (description can be omitted)")
+	deleteCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to delete in the format of 'label1[,label2,...]'")
 }

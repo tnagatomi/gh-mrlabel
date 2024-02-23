@@ -28,6 +28,7 @@ import (
 	"github.com/tnagatomi/gh-mrlabel/parser"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // Executor composites github.Client and has dry-run option
@@ -68,6 +69,34 @@ func (e *Executor) Create(out io.Writer, repoOption string, labelOption string) 
 				continue
 			}
 			fmt.Fprintf(out, "Created label %q for repository %q\n", label, repo)
+		}
+	}
+
+	return nil
+}
+
+// Delete deletes labels across multiple repositories
+func (e *Executor) Delete(out io.Writer, repoOption string, labelOption string) error {
+	labels := strings.Split(labelOption, ",")
+
+	repos, err := parser.Repo(repoOption)
+	if err != nil {
+		return fmt.Errorf("failed to parse repo option: %v", err)
+	}
+
+	for _, repo := range repos {
+		for _, label := range labels {
+			if e.dryRun {
+				fmt.Fprintf(out, "Would delete label %q for repository %q\n", label, repo)
+				continue
+			}
+
+			err = api.DeleteLabel(e.client, label, repo)
+			if err != nil {
+				fmt.Fprintf(out, "Failed to delete label %q for repository %q: %v\n", label, repo, err)
+				continue
+			}
+			fmt.Fprintf(out, "Deleted label %q for repository %q\n", label, repo)
 		}
 	}
 
