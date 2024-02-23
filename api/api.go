@@ -29,6 +29,7 @@ import (
 	"strings"
 )
 
+// CreateLabel creates a label in the repository
 func CreateLabel(client *github.Client, label option.Label, repo option.Repo) error {
 	githubLabel := &github.Label{
 		Name:        github.String(label.Name),
