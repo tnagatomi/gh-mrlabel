@@ -31,11 +31,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewDeleteCmd represents the delete command
-func NewDeleteCmd(in io.Reader, out io.Writer) *cobra.Command {
-	var deleteCmd = &cobra.Command{
-		Use:   "delete",
-		Short: "Delete labels across multiple repositories",
+// NewEmptyCmd represents the empty command
+func NewEmptyCmd(in io.Reader, out io.Writer) *cobra.Command {
+	var emptyCmd = &cobra.Command{
+		Use:   "empty",
+		Short: "Empties labels across multiple repositories",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := api.NewHTTPClient(api.ClientOptions{})
 			if err != nil {
@@ -58,20 +58,19 @@ func NewDeleteCmd(in io.Reader, out io.Writer) *cobra.Command {
 				}
 			}
 
-			err = e.Delete(out, repos, labels)
+			err = e.Empty(out, repos)
 			if err != nil {
-				return fmt.Errorf("failed to delete labels: %v", err)
+				return fmt.Errorf("failed to empty labels: %v", err)
 			}
 
 			return nil
 		},
 	}
-	return deleteCmd
+
+	return emptyCmd
 }
 
 func init() {
-	deleteCmd := NewDeleteCmd(os.Stdin, os.Stdout)
-	rootCmd.AddCommand(deleteCmd)
-
-	deleteCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to delete in the format of 'label1[,label2,...]'")
+	emptyCmd := NewEmptyCmd(os.Stdin, os.Stdout)
+	rootCmd.AddCommand(emptyCmd)
 }

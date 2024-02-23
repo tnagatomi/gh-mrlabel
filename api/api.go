@@ -58,3 +58,19 @@ func DeleteLabel(client *github.Client, label string, repo option.Repo) error {
 
 	return nil
 }
+
+// ListLabels gets all label names in the repository
+func ListLabels(client *github.Client, repo option.Repo) ([]string, error) {
+	labels, _, err := client.Issues.ListLabels(context.Background(), repo.Owner, repo.Repo, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var labelNames []string
+	for _, l := range labels {
+		labelNames = append(labelNames, l.GetName())
+	}
+
+	return labelNames, nil
+}

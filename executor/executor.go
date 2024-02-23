@@ -102,3 +102,36 @@ func (e *Executor) Delete(out io.Writer, repoOption string, labelOption string) 
 
 	return nil
 }
+
+// Empty empties labels across multiple repositories
+func (e *Executor) Empty(out io.Writer, repoOption string) error {
+	repos, err := parser.Repo(repoOption)
+	if err != nil {
+		return fmt.Errorf("failed to parse repo option: %v", err)
+	}
+
+	for _, repo := range repos {
+		labels, err := api.ListLabels(e.client, repo)
+		if err != nil {
+			return fmt.Errorf("failed to list labels: %v", err)
+		}
+
+		if e.dryRun {
+			for _, label := range labels {
+				fmt.Fprintf(out, "Would delete label %q for repository %q\n", label, repo)
+			}
+			continue
+		}
+
+		for _, label := range labels {
+			err = api.DeleteLabel(e.client, label, repo)
+			if err != nil {
+				return fmt.Errorf("failed to delete label %q for repository %q: %v\n", label, repo, err)
+			} else {
+				fmt.Fprintf(out, "Deleted label %q for repository %q\n", label, repo)
+			}
+		}
+	}
+
+	return nil
+}
