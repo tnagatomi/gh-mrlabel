@@ -19,42 +19,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package api
+package cmd
 
 import (
-	"context"
+	"bufio"
 	"fmt"
-	"github.com/google/go-github/v59/github"
-	"github.com/tnagatomi/gh-mrlabel/option"
-	"strings"
+	"io"
 )
 
-// CreateLabel creates a label in the repository
-func CreateLabel(client *github.Client, label option.Label, repo option.Repo) error {
-	githubLabel := &github.Label{
-		Name:        github.String(label.Name),
-		Description: github.String(label.Description),
-		Color:       github.String(label.Color),
-	}
-	_, _, err := client.Issues.CreateLabel(context.Background(), repo.Owner, repo.Repo, githubLabel)
+// confirm asks user to really execute a command
+func confirm(in io.Reader, out io.Writer) (bool, error) {
+	fmt.Fprintf(out, "Are you sure you want to do this? (y/n): ")
 
+	reader := bufio.NewReader(in)
+	s, err := reader.ReadString('\n')
 	if err != nil {
-		if strings.Contains(err.Error(), "already_exists") {
-			return fmt.Errorf("label %q already exists for repository %q", label, repo)
-		}
-		return err
+		return false, fmt.Errorf("failed to read: %v", err)
 	}
-
-	return nil
-}
-
-// DeleteLabel deletes a label in the repository
-func DeleteLabel(client *github.Client, label string, repo option.Repo) error {
-	_, err := client.Issues.DeleteLabel(context.Background(), repo.Owner, repo.Repo, label)
-
-	if err != nil {
-		return err
+	if s == "y\n" {
+		return true, nil
 	}
-
-	return nil
+	return false, nil
 }
