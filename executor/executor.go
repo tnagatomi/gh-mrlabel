@@ -132,7 +132,7 @@ func (e *Executor) Sync(out io.Writer, repoOption string, labelOption string) er
 	for _, repo := range repos {
 		for _, label := range labels {
 			if e.dryRun {
-				fmt.Fprintf(out, "Would set label %q for repository %q\n", label, repo)
+				fmt.Fprintf(out, "Would create label %q for repository %q\n", label, repo)
 				continue
 			}
 
