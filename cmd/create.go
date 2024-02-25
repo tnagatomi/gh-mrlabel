@@ -30,10 +30,6 @@ import (
 	"os"
 )
 
-var (
-	labels string
-)
-
 // NewCreateCmd initialize the create command
 func NewCreateCmd(out io.Writer) *cobra.Command {
 	var createCmd = &cobra.Command{

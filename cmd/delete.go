@@ -47,7 +47,7 @@ func NewDeleteCmd(in io.Reader, out io.Writer) *cobra.Command {
 				return fmt.Errorf("failed to create exector: %v", err)
 			}
 
-			if !dryRun {
+			if !dryRun && !force {
 				confirmed, err := confirm(in, out)
 				if err != nil {
 					return fmt.Errorf("failed to confirm execution: %v", err)
@@ -74,6 +74,7 @@ func init() {
 	rootCmd.AddCommand(deleteCmd)
 
 	deleteCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to delete in the format of 'label1[,label2,...]'")
+	deleteCmd.Flags().BoolVar(&force, "force", false, "Do not prompt for confirmation")
 
 	err := deleteCmd.MarkFlagRequired("labels")
 	if err != nil {

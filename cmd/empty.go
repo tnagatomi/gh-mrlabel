@@ -47,7 +47,7 @@ func NewEmptyCmd(in io.Reader, out io.Writer) *cobra.Command {
 				return fmt.Errorf("failed to create exector: %v", err)
 			}
 
-			if !dryRun {
+			if !dryRun && !force {
 				confirmed, err := confirm(in, out)
 				if err != nil {
 					return fmt.Errorf("failed to confirm execution: %v", err)
@@ -73,4 +73,6 @@ func NewEmptyCmd(in io.Reader, out io.Writer) *cobra.Command {
 func init() {
 	emptyCmd := NewEmptyCmd(os.Stdin, os.Stdout)
 	rootCmd.AddCommand(emptyCmd)
+
+	emptyCmd.Flags().BoolVar(&force, "force", false, "Do not prompt for confirmation")
 }

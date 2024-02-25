@@ -47,7 +47,7 @@ func NewSyncCmd(in io.Reader, out io.Writer) *cobra.Command {
 				return fmt.Errorf("failed to create exector: %v", err)
 			}
 
-			if !dryRun {
+			if !dryRun && !force {
 				confirmed, err := confirm(in, out)
 				if err != nil {
 					return fmt.Errorf("failed to confirm execution: %v", err)
@@ -74,6 +74,7 @@ func init() {
 	rootCmd.AddCommand(syncCmd)
 
 	syncCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to set in the format of 'label1:color1:description1[,label2:color2:description2,...]' (description can be omitted)")
+	syncCmd.Flags().BoolVar(&force, "force", false, "Do not prompt for confirmation")
 
 	err := syncCmd.MarkFlagRequired("labels")
 	if err != nil {

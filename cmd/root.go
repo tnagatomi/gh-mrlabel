@@ -29,6 +29,8 @@ import (
 var (
 	repos  string
 	dryRun bool
+	force  bool
+	labels string
 )
 
 // rootCmd represents the base command when called without any subcommands
