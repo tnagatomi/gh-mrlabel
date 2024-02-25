@@ -45,4 +45,6 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&repos, "repos", "R", "", "Select repositories using the OWNER/REPO format separated by comma (e.g., owner1/repo1,owner2/repo2)")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Dry run")
+
+	rootCmd.MarkPersistentFlagRequired("repos")
 }
