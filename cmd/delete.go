@@ -75,5 +75,8 @@ func init() {
 
 	deleteCmd.Flags().StringVarP(&labels, "labels", "l", "", "Specify the labels to delete in the format of 'label1[,label2,...]'")
 
-	deleteCmd.MarkFlagRequired("labels")
+	err := deleteCmd.MarkFlagRequired("labels")
+	if err != nil {
+		fmt.Printf("Failed to mark flag required: %v\n", err)
+	}
 }

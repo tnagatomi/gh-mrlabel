@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
@@ -46,5 +47,8 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&repos, "repos", "R", "", "Select repositories using the OWNER/REPO format separated by comma (e.g., owner1/repo1,owner2/repo2)")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "Dry run")
 
-	rootCmd.MarkPersistentFlagRequired("repos")
+	err := rootCmd.MarkPersistentFlagRequired("repos")
+	if err != nil {
+		fmt.Printf("Failed to mark flag required: %v\n", err)
+	}
 }
