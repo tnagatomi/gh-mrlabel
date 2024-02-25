@@ -120,11 +120,9 @@ func (e *Executor) Sync(out io.Writer, repoOption string, labelOption string) er
 		fmt.Fprintf(out, "Emptying labels first\n")
 	}
 
-	if !e.dryRun {
-		err = e.emptyLabels(out, repos)
-		if err != nil {
-			return fmt.Errorf("failed to empty labels: %v", err)
-		}
+	err = e.emptyLabels(out, repos)
+	if err != nil {
+		return fmt.Errorf("failed to empty labels: %v", err)
 	}
 
 	if !e.dryRun {
@@ -158,6 +156,11 @@ func (e *Executor) emptyLabels(out io.Writer, repos []option.Repo) error {
 		}
 
 		for _, label := range labels {
+			if e.dryRun {
+				fmt.Fprintf(out, "Would delete label %q for repository %q\n", label, repo)
+				continue
+			}
+
 			err = api.DeleteLabel(e.client, label, repo)
 			if err != nil {
 				return fmt.Errorf("failed to delete label %q for repository %q: %v\n", label, repo, err)
