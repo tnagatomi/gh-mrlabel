@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"github.com/google/go-github/v59/github"
 	"github.com/tnagatomi/gh-mrlabel/api"
+	"github.com/tnagatomi/gh-mrlabel/option"
 	"github.com/tnagatomi/gh-mrlabel/parser"
 	"io"
 	"net/http"
@@ -103,24 +104,57 @@ func (e *Executor) Delete(out io.Writer, repoOption string, labelOption string) 
 	return nil
 }
 
-// Empty empties labels across multiple repositories
-func (e *Executor) Empty(out io.Writer, repoOption string) error {
+// Sync sync labels across multiple repositories
+func (e *Executor) Sync(out io.Writer, repoOption string, labelOption string) error {
 	repos, err := parser.Repo(repoOption)
 	if err != nil {
 		return fmt.Errorf("failed to parse repo option: %v", err)
 	}
 
+	labels, err := parser.Label(labelOption)
+	if err != nil {
+		return fmt.Errorf("failed to parse label option: %v", err)
+	}
+
+	if !e.dryRun {
+		fmt.Fprintf(out, "Emptying labels first\n")
+	}
+
+	if !e.dryRun {
+		err = e.emptyLabels(out, repos)
+		if err != nil {
+			return fmt.Errorf("failed to empty labels: %v", err)
+		}
+	}
+
+	if !e.dryRun {
+		fmt.Fprintf(out, "Creating labels\n")
+	}
+
+	for _, repo := range repos {
+		for _, label := range labels {
+			if e.dryRun {
+				fmt.Fprintf(out, "Would set label %q for repository %q\n", label, repo)
+				continue
+			}
+
+			err = api.CreateLabel(e.client, label, repo)
+			if err != nil {
+				fmt.Fprintf(out, "Failed to create label %q for repository %q: %v\n", label, repo, err)
+				continue
+			}
+			fmt.Fprintf(out, "Created label %q for repository %q\n", label, repo)
+		}
+	}
+
+	return nil
+}
+
+func (e *Executor) emptyLabels(out io.Writer, repos []option.Repo) error {
 	for _, repo := range repos {
 		labels, err := api.ListLabels(e.client, repo)
 		if err != nil {
 			return fmt.Errorf("failed to list labels: %v", err)
-		}
-
-		if e.dryRun {
-			for _, label := range labels {
-				fmt.Fprintf(out, "Would delete label %q for repository %q\n", label, repo)
-			}
-			continue
 		}
 
 		for _, label := range labels {
@@ -131,6 +165,20 @@ func (e *Executor) Empty(out io.Writer, repoOption string) error {
 				fmt.Fprintf(out, "Deleted label %q for repository %q\n", label, repo)
 			}
 		}
+	}
+	return nil
+}
+
+// Empty empties labels across multiple repositories
+func (e *Executor) Empty(out io.Writer, repoOption string) error {
+	repos, err := parser.Repo(repoOption)
+	if err != nil {
+		return fmt.Errorf("failed to parse repo option: %v", err)
+	}
+
+	err = e.emptyLabels(out, repos)
+	if err != nil {
+		return fmt.Errorf("failed to empty labels: %v", err)
 	}
 
 	return nil
