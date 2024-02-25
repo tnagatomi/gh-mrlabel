@@ -1,6 +1,6 @@
 module github.com/tnagatomi/gh-mrlabel
 
-go 1.22.0
+go 1.22
 
 require (
 	github.com/cli/go-gh/v2 v2.5.0
