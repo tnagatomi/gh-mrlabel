@@ -16,7 +16,7 @@ Login to GitHub with `gh auth login` (ref. [gh manual of gh auth login](https://
 
 ### Global Options
 
-- `-R`, `--repos`: Select repositories using the `OWNER/REPO` format separated by comma (e.g., `OWNER/REPO,OWNER/REPO`)
+- `-R`, `--repos`: Select repositories using the `OWNER/REPO` format separated by comma (e.g., `owner1/repo1,owner2/repo1`)
 - `--dry-run`: Check what operations would be executed without actually operating on the repositories
 
 ### List of Commands
