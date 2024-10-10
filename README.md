@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This repository has been transferred to https://github.com/tnagatomi/gh-fuda
+
 # gh-mrlabel
 
 `gh-mrlabel` is a gh extension for manipulating labels across multiple repositories
